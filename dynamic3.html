@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Details</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        label {
+            display: block;
+            margin-top: 10px;
+        }
+        input, button {
+            margin-top: 5px;
+        }
+        table {
+            margin-top: 20px;
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+            cursor: pointer;
+        }
+        th.sort-asc::after {
+            content: " ▲";
+        }
+        th.sort-desc::after {
+            content: " ▼";
+        }
+        .edit, .delete {
+            cursor: pointer;
+            color: blue;
+        }
+    </style>
+</head>
+<body>
+
+<h2>Enter Student Details</h2>
+<form id="studentForm">
+    <label for="name">Name:</label>
+    <input type="text" id="name" required>
+
+    <label for="age">Age:</label>
+    <input type="number" id="age" required>
+
+    <label for="grade">Grade:</label>
+    <input type="text" id="grade" required>
+
+    <label for="subject">Subject:</label>
+    <input type="text" id="subject" required>
+
+    <label for="marks">Marks:</label>
+    <input type="number" id="marks" required>
+
+    <label for="outOf">Out Of:</label>
+    <input type="number" id="outOf" required>
+
+    <label for="dob">Date of Birth:</label>
+    <input type="date" id="dob" required>
+
+    <button type="button" id="addStudent">Add Student</button>
+    <button type="button" id="updateStudent" style="display:none;">Update Student</button>
+</form>
+
+<h3>Student List</h3>
+<table id="studentTable">
+    <thead>
+        <tr>
+            <th data-sort="name">Name</th>
+            <th data-sort="age">Age</th>
+            <th data-sort="grade">Grade</th>
+            <th data-sort="subject">Subject</th>
+            <th data-sort="marks">Marks</th>
+            <th data-sort="outOf">Out Of</th>
+            <th data-sort="dob">DOB</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        <!-- Student details will be appended here -->
+    </tbody>
+</table>
+
+<script>
+    let students = [];
+    let editIndex = -1;
+
+    function renderTable() {
+        $('#studentTable tbody').empty();
+        students.forEach((student, index) => {
+            $('#studentTable tbody').append(
+                `<tr>
+                    <td>${student.name}</td>
+                    <td>${student.age}</td>
+                    <td>${student.grade}</td>
+                    <td>${student.subject}</td>
+                    <td>${student.marks}</td>
+                    <td>${student.outOf}</td>
+                    <td>${student.dob}</td>
+                    <td>
+                        <span class="edit" data-index="${index}">Edit</span> | 
+                        <span class="delete" data-index="${index}">Delete</span>
+                    </td>
+                </tr>`
+            );
+        });
+    }
+
+    $(document).ready(function(){
+        $('#addStudent').click(function(){
+            let student = {
+                name: $('#name').val(),
+                age: $('#age').val(),
+                grade: $('#grade').val(),
+                subject: $('#subject').val(),
+                marks: $('#marks').val(),
+                outOf: $('#outOf').val(),
+                dob: $('#dob').val()
+            };
+
+            students.push(student);
+            renderTable();
+
+            $('#studentForm')[0].reset();
+        });
+
+        $('#updateStudent').click(function(){
+            let student = {
+                name: $('#name').val(),
+                age: $('#age').val(),
+                grade: $('#grade').val(),
+                subject: $('#subject').val(),
+                marks: $('#marks').val(),
+                outOf: $('#outOf').val(),
+                dob: $('#dob').val()
+            };
+
+            students[editIndex] = student;
+            renderTable();
+
+            $('#studentForm')[0].reset();
+            $('#addStudent').show();
+            $('#updateStudent').hide();
+        });
+
+        $(document).on('click', '.edit', function(){
+            editIndex = $(this).data('index');
+            let student = students[editIndex];
+
+            $('#name').val(student.name);
+            $('#age').val(student.age);
+            $('#grade').val(student.grade);
+            $('#subject').val(student.subject);
+            $('#marks').val(student.marks);
+            $('#outOf').val(student.outOf);
+            $('#dob').val(student.dob);
+
+            $('#addStudent').hide();
+            $('#updateStudent').show();
+        });
+
+        $(document).on('click', '.delete', function(){
+            let index = $(this).data('index');
+            students.splice(index, 1);
+            renderTable();
+        });
+
+        $('th[data-sort]').click(function(){
+            let sortKey = $(this).data('sort');
+            let direction = $(this).hasClass('sort-asc') ? 'desc' : 'asc';
+
+            students.sort((a, b) => {
+                if (a[sortKey] < b[sortKey]) return direction === 'asc' ? -1 : 1;
+                if (a[sortKey] > b[sortKey]) return direction === 'asc' ? 1 : -1;
+                return 0;
+            });
+
+            $('th').removeClass('sort-asc sort-desc');
+            $(this).addClass(direction === 'asc' ? 'sort-asc' : 'sort-desc');
+            renderTable();
+        });
+    });
+</script>
+
+</body>
+</html>
